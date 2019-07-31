@@ -1,6 +1,7 @@
 require('dotenv').config();
 const Twitter = require('twitter');
 const Spotify = require('node-spotify-api');
+const fs = require('file-system');
 const request = require('request');
 const keys = require('./keys');
 
@@ -35,7 +36,7 @@ switch (liriCommand) {
     imdbMovieRequest(searchItem);
     break;
   case 'do-what-it-says':
-    console.log('DO WHAT IT SAYS');
+    doWhatitSays();
     break;
 }
 
@@ -129,6 +130,18 @@ function imdbMovieRequest(movieName) {
 }
 
 // 4. `node liri.js do-what-it-says`
-// using the fs package  have it read inside random.txt and run the command.
+function doWhatitSays() {
+  // using the fs package  have it read inside random.txt and run the command.
+  fs.readFile('random.txt', 'utf8', (error, data) => {
+    // log error to console
+    if (error) {
+      return console.error(error);
+    }
+
+    let params = data.split(',');
+    let songTitle = params[1];
+    findSpotifySong(songTitle);
+  });
+}
 
 // Bonus --- log all commands to a txt file named log.txt
