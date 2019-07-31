@@ -32,7 +32,7 @@ switch (liriCommand) {
     findSpotifySong(searchItem);
     break;
   case 'movie-this':
-    console.log('MOVIE THIS');
+    imdbMovieRequest(searchItem);
     break;
   case 'do-what-it-says':
     console.log('DO WHAT IT SAYS');
@@ -62,8 +62,9 @@ function logTweets() {
 function findSpotifySong(searchItem) {
   spotify.search({ type: 'track', query: searchItem }).then(response => {
     // turning the response into JSON and making it readable!
+    // console.log(JSON.parse(response));
     // console.log(JSON.stringify(response, null, 2));
-    // console.log(response.tracks.items[0]);
+    // console.log(response.tracks.items[0].artists);
 
     // default will be Sorry justin beiber
     if (response.tracks.total === 0) {
@@ -71,33 +72,61 @@ function findSpotifySong(searchItem) {
       findSpotifySong(defaultSong);
     } else {
       for (i = 0; i < 5; i++) {
+        console.log(' ');
         // Artist(s) -- Can't figure this one out
-        // console.log(
-        //   `Artist(s): ${JSON.stringify(response.tracks.items[i].album.artists)}`
-        // );
-        // The Song's Name
+        // almost there. Comment it out and ask for help.
+        // console.log(`Artist(s): ${response.tracks.items[i].album.artists}`);
+        // // The Song's Name
         console.log(`Song name: ${response.tracks.items[i].name}`);
-
         // a preview link of the song from spotify
         console.log(
           `Preview the song: ${response.tracks.items[i].preview_url}`
         );
-
         // the album the song is from -- same issue as Artists
+        console.log(
+          `Album this song is on: ${response.tracks.items[0].album.name}`
+        );
+        console.log(' ');
       }
     }
   });
 }
 
 // 3. `node liri.js movie-this '<movie name here>' will display:
-// title of the movie
-// Year the movie came out
-// IMDB rating of the movie
-// Country where the movie was produced
-// Language of the movie
-// Plot of the movie
-// Actors in the movie
-// default Ready Player One
+function imdbMovieRequest(movieName) {
+  let queryUrl = `http://www.omdbapi.com/?t=${movieName}&y=&plot=short&apikey=trilogy`;
+
+  // console.log(queryUrl);
+
+  request(queryUrl, (error, response, body) => {
+    if (!error && response.statusCode === 200) {
+      // console.log(JSON.parse(body));
+      let bodyParse = JSON.parse(body);
+      if (bodyParse.Title === undefined) {
+        // default Ready Player One
+        const defaultMovie = 'Ready Player One';
+        imdbMovieRequest(defaultMovie);
+      } else {
+        console.log(' ');
+        // title of the movie
+        console.log(`Movie Title: ${bodyParse.Title}`);
+        // Year the movie came out
+        console.log(`Year: ${bodyParse.Year}`);
+        // IMDB rating of the movie
+        console.log(`IMDB rating: ${bodyParse.imdbRating}`);
+        // Country where the movie was produced
+        console.log(`Country Produced: ${bodyParse.Country}`);
+        // Language of the movie
+        console.log(`Language: ${bodyParse.Language}`);
+        // Plot of the movie
+        console.log(`Movie Plot: ${bodyParse.Plot}`);
+        // Actors in the movie
+        console.log(`Actors in the movie: ${bodyParse.Actors}`);
+        console.log(' ');
+      }
+    }
+  });
+}
 
 // 4. `node liri.js do-what-it-says`
 // using the fs package  have it read inside random.txt and run the command.
